@@ -1,0 +1,38 @@
+SchemaVersion: "1.0"
+
+Name: DeployStudentAssessmentApp
+
+Triggers:
+  - Type: Push
+    Provider: github
+    RepositoryName: Experiment_With_AWSCodeCatalyst
+    BranchName: main
+      
+Actions:
+  build_react:
+    identifier: aws/build@v1
+    inputs:
+      sources:
+        - source: source
+    commands:
+      - cd frontend
+      - npm install
+      - npm run build
+    outputs:
+      artifacts:
+        - name: react-build
+          files:
+            - frontend/build/**
+
+  deploy_infra:
+    identifier: aws/cdk-deploy@v1
+    inputs:
+      sources:
+        - source: source
+    environment:
+      name: Experiment_With_AWSCodeCatalyst-env
+      runtime: python/3.11
+    commands:
+      - cd infrastructure
+      - pip install -r requirements.txt
+      - cdk deploy --require-approval never
