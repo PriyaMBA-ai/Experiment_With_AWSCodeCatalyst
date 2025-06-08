@@ -1,0 +1,35 @@
+name: Deploy Student Assessment App
+
+triggers:
+  - type: push
+    branches:
+      - main
+
+actions:
+  BuildReactApp:
+    identifier: aws/build@v1
+    inputs:
+      sources:
+        - source: source
+      commands:
+        - cd frontend
+        - npm install
+        - npm run build
+    outputs:
+      artifacts:
+        - name: react-build
+          files:
+            - frontend/build/**
+
+  DeployInfrastructure:
+    identifier: aws/cdk-deploy@v1
+    inputs:
+      sources:
+        - source: source
+      environment:
+        name: student-assessment-env
+        runtime: python/3.11
+      commands:
+        - cd infrastructure
+        - pip install -r requirements.txt
+        - cdk deploy --require-approval never
